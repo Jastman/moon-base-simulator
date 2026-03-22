@@ -8,13 +8,13 @@ Design your moon base using real NASA lunar terrain data, analyze water ice depo
 
 ## Screenshots
 
-![Lunar surface terrain](https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Lunar_surface_seen_by_LRO.jpg/1280px-Lunar_surface_seen_by_LRO.jpg)
+![Lunar surface terrain](https://upload.wikimedia.org/wikipedia/commons/c/c9/Moon_nearside_LRO.jpg)
 *Lunar terrain visualization (Cesium Moon Terrain tileset / LRO data)*
 
-![Moon south pole region](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Shackleton_crater_LROC.jpg/1280px-Shackleton_crater_LROC.jpg)
+![Moon south pole region](https://upload.wikimedia.org/wikipedia/commons/9/9a/Rimlight-_Shackleton_Crater_%283929168011%29.jpg)
 *Shackleton Crater region — candidate site for base placement near water ice deposits*
 
-![Lunar surface from Apollo](https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/AS11-40-5931.jpg/1280px-AS11-40-5931.jpg)
+![Lunar surface from Apollo](https://upload.wikimedia.org/wikipedia/commons/9/9c/Aldrin_Apollo_11.jpg)
 *Surface-level reference for rover mode terrain and lighting*
 
 > **Note:** Screenshots above are NASA/LRO public domain reference imagery. In-game screenshots coming soon.

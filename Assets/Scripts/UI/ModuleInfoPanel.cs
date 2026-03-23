@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using MoonBase.Core;
+using MoonBase.Modules;
 
 namespace MoonBase.UI
 {

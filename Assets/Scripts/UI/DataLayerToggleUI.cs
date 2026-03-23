@@ -1,113 +1,63 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using MoonBase.Core;
+using MoonBase.DataLayers;
 
 namespace MoonBase.UI
 {
+    /// <summary>
+    /// Panel with three toggle buttons to show/hide data layers.
+    /// F1 = Solar Exposure, F2 = Ice Deposits, F3 = Temperature
+    ///
+    /// DataLayerManager layers are referenced by index (matches order in Inspector list).
+    /// Default expected order: 0=Solar, 1=Ice, 2=Temperature
+    /// </summary>
     public class DataLayerToggleUI : MonoBehaviour
     {
+        [Header("Toggles")]
         [SerializeField] private Toggle solarToggle;
         [SerializeField] private Toggle iceToggle;
         [SerializeField] private Toggle tempToggle;
 
-        private void Start()
+        [Header("Layer Indices (match DataLayerManager.layers list order)")]
+        [SerializeField] private int solarLayerIndex = 0;
+        [SerializeField] private int iceLayerIndex   = 1;
+        [SerializeField] private int tempLayerIndex  = 2;
+
+        private void OnEnable()
         {
-            // Wire toggle listeners
-            if (solarToggle != null)
-            {
-                solarToggle.onValueChanged.AddListener(OnSolarToggleChanged);
-            }
-
-            if (iceToggle != null)
-            {
-                iceToggle.onValueChanged.AddListener(OnIceToggleChanged);
-            }
-
-            if (tempToggle != null)
-            {
-                tempToggle.onValueChanged.AddListener(OnTempToggleChanged);
-            }
+            if (solarToggle != null) solarToggle.onValueChanged.AddListener(OnSolarToggle);
+            if (iceToggle   != null) iceToggle.onValueChanged.AddListener(OnIceToggle);
+            if (tempToggle  != null) tempToggle.onValueChanged.AddListener(OnTempToggle);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            // Clean up listeners
-            if (solarToggle != null)
-            {
-                solarToggle.onValueChanged.RemoveListener(OnSolarToggleChanged);
-            }
-
-            if (iceToggle != null)
-            {
-                iceToggle.onValueChanged.RemoveListener(OnIceToggleChanged);
-            }
-
-            if (tempToggle != null)
-            {
-                tempToggle.onValueChanged.RemoveListener(OnTempToggleChanged);
-            }
+            if (solarToggle != null) solarToggle.onValueChanged.RemoveListener(OnSolarToggle);
+            if (iceToggle   != null) iceToggle.onValueChanged.RemoveListener(OnIceToggle);
+            if (tempToggle  != null) tempToggle.onValueChanged.RemoveListener(OnTempToggle);
         }
 
         private void Update()
         {
-            HandleKeyboardShortcuts();
+            if (Input.GetKeyDown(KeyCode.F1)) FlipToggle(solarToggle, solarLayerIndex);
+            if (Input.GetKeyDown(KeyCode.F2)) FlipToggle(iceToggle,   iceLayerIndex);
+            if (Input.GetKeyDown(KeyCode.F3)) FlipToggle(tempToggle,  tempLayerIndex);
         }
 
-        private void HandleKeyboardShortcuts()
+        private void OnSolarToggle(bool on) => SetLayer(solarLayerIndex, on);
+        private void OnIceToggle(bool on)   => SetLayer(iceLayerIndex,   on);
+        private void OnTempToggle(bool on)  => SetLayer(tempLayerIndex,  on);
+
+        private void SetLayer(int index, bool visible)
         {
-            if (Input.GetKeyDown(KeyCode.F1))
-            {
-                if (solarToggle != null)
-                {
-                    solarToggle.isOn = !solarToggle.isOn;
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.F2))
-            {
-                if (iceToggle != null)
-                {
-                    iceToggle.isOn = !iceToggle.isOn;
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.F3))
-            {
-                if (tempToggle != null)
-                {
-                    tempToggle.isOn = !tempToggle.isOn;
-                }
-            }
+            if (DataLayerManager.Instance != null)
+                DataLayerManager.Instance.SetLayerVisible(index, visible);
         }
 
-        private void OnSolarToggleChanged(bool isOn)
+        private void FlipToggle(Toggle t, int layerIndex)
         {
-            DataLayerManager manager = FindObjectOfType<DataLayerManager>();
-            if (manager != null)
-            {
-                manager.SetLayerVisible("SolarExposure", isOn);
-                Debug.Log($"Solar Exposure layer {(isOn ? "enabled" : "disabled")}");
-            }
-        }
-
-        private void OnIceToggleChanged(bool isOn)
-        {
-            DataLayerManager manager = FindObjectOfType<DataLayerManager>();
-            if (manager != null)
-            {
-                manager.SetLayerVisible("IceDeposits", isOn);
-                Debug.Log($"Ice Deposits layer {(isOn ? "enabled" : "disabled")}");
-            }
-        }
-
-        private void OnTempToggleChanged(bool isOn)
-        {
-            DataLayerManager manager = FindObjectOfType<DataLayerManager>();
-            if (manager != null)
-            {
-                manager.SetLayerVisible("Temperature", isOn);
-                Debug.Log($"Temperature layer {(isOn ? "enabled" : "disabled")}");
-            }
+            if (t == null) { SetLayer(layerIndex, !DataLayerManager.Instance?.IsLayerVisible(layerIndex) ?? false); return; }
+            t.isOn = !t.isOn; // triggers onValueChanged which calls SetLayer
         }
     }
 }

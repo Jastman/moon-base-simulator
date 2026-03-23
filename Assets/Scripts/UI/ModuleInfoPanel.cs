@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using MoonBase.Core;
@@ -42,28 +42,28 @@ namespace MoonBase.UI
             if (moduleNameLabel != null)
                 moduleNameLabel.text = def != null ? def.moduleName : module.gameObject.name;
             if (moduleTypeLabel != null)
-                moduleTypeLabel.text = def != null ? def.moduleType.ToString() : "Unknown";
+                moduleTypeLabel.text = def != null ? def.category.ToString() : "Unknown";
 
             // Power info from PowerModule if present
             var power = module.GetComponent<PowerModule>();
             if (powerLabel != null)
             {
                 if (power != null)
-                    powerLabel.text = $"Power: {power.CurrentPowerOutput:F1} / {power.basePowerKW:F1} kW";
+                    powerLabel.text = $"Power: {power.CurrentOutputKW:F1} / {power.basePowerKW:F1} kW";
                 else
                     powerLabel.text = "Power: N/A";
             }
 
-            // Status — PowerModule exposes IsActive, else just show "Placed"
+            // Status - use moduleRole since IsActive is not available
             if (statusLabel != null)
                 statusLabel.text = power != null
-                    ? $"Status: {(power.IsActive ? "Online" : "Offline")}"
+                    ? $"Status: {power.moduleRole}"
                     : "Status: Placed";
 
             // Dust level from PowerModule
             if (dustLabel != null)
                 dustLabel.text = power != null
-                    ? $"Dust: {power.dustAccumulation * 100f:F0}%"
+                    ? $"Dust: {power.DustAccumulation * 100f:F0}%"
                     : "Dust: N/A";
         }
 

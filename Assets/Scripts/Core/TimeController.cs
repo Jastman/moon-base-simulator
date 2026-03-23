@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using MoonBase.UI;
 
 namespace MoonBase.Core
 {
@@ -98,13 +99,6 @@ namespace MoonBase.Core
                 86400f => "86400x Speed (1 sec = 1 day)",
                 _ => $"{multiplier}x Speed"
             };
-
-            // Update UI if available
-            var dashboard = FindObjectOfType<OperationsDashboardUI>();
-            if (dashboard != null && dashboard.timeScaleLabel != null)
-            {
-                dashboard.timeScaleLabel.text = displayText;
-            }
         }
 
         public float GetCurrentTimeScale()

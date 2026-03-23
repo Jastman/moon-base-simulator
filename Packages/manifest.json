@@ -1,6 +1,6 @@
-﻿{
+{
   "dependencies": {
-    "com.cesium.unity": "1.15.2",
+    "com.cesium.unity": "1.15.0",
     "com.unity.render-pipelines.universal": "17.0.3",
     "com.unity.inputsystem": "1.8.2",
     "com.unity.textmeshpro": "3.0.9",

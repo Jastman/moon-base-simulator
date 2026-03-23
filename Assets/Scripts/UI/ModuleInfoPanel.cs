@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using MoonBase.Core;
@@ -6,6 +6,10 @@ using MoonBase.Modules;
 
 namespace MoonBase.UI
 {
+    /// <summary>
+    /// Info panel shown when a placed module is clicked.
+    /// Uses public API from BaseModule and PowerModule.
+    /// </summary>
     public class ModuleInfoPanel : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI moduleNameLabel;
@@ -16,123 +20,72 @@ namespace MoonBase.UI
 
         [SerializeField] private Button clearDustButton;
         [SerializeField] private Button removeModuleButton;
-
         [SerializeField] private GameObject panelRoot;
 
         private BaseModule currentModule;
 
         private void Start()
         {
-            // Wire button listeners
-            if (clearDustButton != null)
-            {
-                clearDustButton.onClick.AddListener(OnClearDustClicked);
-            }
-
-            if (removeModuleButton != null)
-            {
-                removeModuleButton.onClick.AddListener(OnRemoveModuleClicked);
-            }
-
-            // Start hidden
+            if (clearDustButton  != null) clearDustButton.onClick.AddListener(OnClearDustClicked);
+            if (removeModuleButton != null) removeModuleButton.onClick.AddListener(OnRemoveModuleClicked);
             Hide();
         }
 
         public void Show(BaseModule module)
         {
-            if (module == null)
-            {
-                Hide();
-                return;
-            }
-
+            if (module == null) { Hide(); return; }
             currentModule = module;
+            if (panelRoot != null) panelRoot.SetActive(true);
 
-            if (panelRoot != null)
-            {
-                panelRoot.SetActive(true);
-            }
-
-            // Populate fields
+            // Module name and type from ModuleDefinition
+            var def = module.ModuleDefinition;
             if (moduleNameLabel != null)
-            {
-                moduleNameLabel.text = module.moduleName;
-            }
-
+                moduleNameLabel.text = def != null ? def.moduleName : module.gameObject.name;
             if (moduleTypeLabel != null)
-            {
-                moduleTypeLabel.text = module.moduleType;
-            }
+                moduleTypeLabel.text = def != null ? def.moduleType.ToString() : "Unknown";
 
-            // Get power info if available
+            // Power info from PowerModule if present
+            var power = module.GetComponent<PowerModule>();
             if (powerLabel != null)
             {
-                PowerModule powerModule = module.GetComponent<PowerModule>();
-                if (powerModule != null)
-                {
-                    powerLabel.text = $"Power: {powerModule.powerConsumption} kW";
-                }
+                if (power != null)
+                    powerLabel.text = $"Power: {power.CurrentPowerOutput:F1} / {power.basePowerKW:F1} kW";
                 else
-                {
                     powerLabel.text = "Power: N/A";
-                }
             }
 
-            // Status
+            // Status — PowerModule exposes IsActive, else just show "Placed"
             if (statusLabel != null)
-            {
-                statusLabel.text = $"Status: {(module.isOperational ? "Online" : "Offline")}";
-            }
+                statusLabel.text = power != null
+                    ? $"Status: {(power.IsActive ? "Online" : "Offline")}"
+                    : "Status: Placed";
 
-            // Dust accumulation
+            // Dust level from PowerModule
             if (dustLabel != null)
-            {
-                dustLabel.text = $"Dust: {module.dustAccumulation:F1}%";
-            }
+                dustLabel.text = power != null
+                    ? $"Dust: {power.dustAccumulation * 100f:F0}%"
+                    : "Dust: N/A";
         }
 
         public void Hide()
         {
             currentModule = null;
-
-            if (panelRoot != null)
-            {
-                panelRoot.SetActive(false);
-            }
-
-            // Clear any button listeners to avoid memory leaks
-            if (clearDustButton != null)
-            {
-                clearDustButton.onClick.RemoveListener(OnClearDustClicked);
-            }
-
-            if (removeModuleButton != null)
-            {
-                removeModuleButton.onClick.RemoveListener(OnRemoveModuleClicked);
-            }
+            if (panelRoot != null) panelRoot.SetActive(false);
         }
 
         private void OnClearDustClicked()
         {
-            if (currentModule != null)
-            {
-                currentModule.ClearDust();
-                Debug.Log($"Dust cleared on module: {currentModule.moduleName}");
-
-                // Refresh display
-                Show(currentModule);
-            }
+            if (currentModule == null) return;
+            var power = currentModule.GetComponent<PowerModule>();
+            if (power != null) power.ClearDust();
+            Show(currentModule); // refresh
         }
 
         private void OnRemoveModuleClicked()
         {
-            if (currentModule != null)
-            {
-                string moduleName = currentModule.moduleName;
-                Destroy(currentModule.gameObject);
-                Debug.Log($"Module removed: {moduleName}");
-                Hide();
-            }
+            if (currentModule == null) return;
+            Destroy(currentModule.gameObject);
+            Hide();
         }
     }
 }

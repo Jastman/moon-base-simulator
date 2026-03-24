@@ -1,7 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using MoonBase.UI;
 
 namespace MoonBase.Editor
@@ -12,7 +13,7 @@ namespace MoonBase.Editor
         public static void CreateHUDCanvas()
         {
             // Check if HUD Canvas already exists
-            Canvas existingCanvas = FindObjectOfType<Canvas>();
+            Canvas existingCanvas = Object.FindFirstObjectByType<Canvas>();
             if (existingCanvas != null && existingCanvas.name == "HUDCanvas")
             {
                 EditorUtility.DisplayDialog("HUD Canvas", "HUD Canvas already exists in scene.", "OK");
@@ -65,7 +66,7 @@ namespace MoonBase.Editor
             titleText.fontSize = 36;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = Color.white;
-            titleText.alignment = TextAlignmentOptions.MiddleLeft;
+            titleText.alignment = TextAlignmentOptions.Left;
 
             // Header Left - Subtitle
             GameObject subtitleGO = new GameObject("SubtitleText");
@@ -80,7 +81,7 @@ namespace MoonBase.Editor
             subtitleText.text = "SHACKLETON BASE ALPHA";
             subtitleText.fontSize = 20;
             subtitleText.color = new Color(0, 0.831f, 1, 1); // #00D4FF
-            subtitleText.alignment = TextAlignmentOptions.MiddleLeft;
+            subtitleText.alignment = TextAlignmentOptions.Left;
 
             // Header Center - MET Clock
             GameObject metClockGO = new GameObject("MissionTimeLabel");
@@ -95,7 +96,7 @@ namespace MoonBase.Editor
             metText.text = "MET 00:00:00";
             metText.fontSize = 40;
             metText.color = Color.white;
-            metText.alignment = TextAlignmentOptions.MiddleCenter;
+            metText.alignment = TextAlignmentOptions.Center;
             metText.fontStyle = FontStyles.Bold;
 
             // Header Right - Lunar Day
@@ -256,7 +257,7 @@ namespace MoonBase.Editor
             headerText.text = sectionName;
             headerText.fontSize = 16;
             headerText.color = new Color(0, 0.831f, 1, 1); // cyan
-            headerText.alignment = TextAlignmentOptions.MiddleLeft;
+            headerText.alignment = TextAlignmentOptions.Left;
             headerText.fontStyle = FontStyles.Bold;
 
             // Separator
@@ -280,7 +281,7 @@ namespace MoonBase.Editor
                 labelText.text = labelInfo.text;
                 labelText.fontSize = 18;
                 labelText.color = labelInfo.color;
-                labelText.alignment = TextAlignmentOptions.MiddleLeft;
+                labelText.alignment = TextAlignmentOptions.Left;
             }
         }
 
@@ -296,7 +297,7 @@ namespace MoonBase.Editor
             headerText.text = "BATTERY";
             headerText.fontSize = 16;
             headerText.color = new Color(0, 0.831f, 1, 1);
-            headerText.alignment = TextAlignmentOptions.MiddleLeft;
+            headerText.alignment = TextAlignmentOptions.Left;
             headerText.fontStyle = FontStyles.Bold;
 
             // Separator
@@ -339,32 +340,47 @@ namespace MoonBase.Editor
             labelText.text = "BATT: -- %";
             labelText.fontSize = 14;
             labelText.color = Color.white;
-            labelText.alignment = TextAlignmentOptions.MiddleLeft;
+            labelText.alignment = TextAlignmentOptions.Left;
         }
 
         private static void WireUIReferences(GameObject canvasGO, OperationsDashboardUI dashboard)
         {
-            // Wire all SerializeField references by name
-            dashboard.missionTimeLabel = canvasGO.transform.Find("HeaderPanel/MissionTimeLabel").GetComponent<TextMeshProUGUI>();
-            dashboard.lunarDayLabel = canvasGO.transform.Find("HeaderPanel/LunarDayLabel").GetComponent<TextMeshProUGUI>();
-            dashboard.timeScaleLabel = canvasGO.transform.Find("HeaderPanel/TimeScaleLabel").GetComponent<TextMeshProUGUI>();
+            var so = new SerializedObject(dashboard);
 
-            dashboard.powerGenLabel = canvasGO.transform.Find("LeftSidebar/Content/PowerGenLabel").GetComponent<TextMeshProUGUI>();
-            dashboard.powerConLabel = canvasGO.transform.Find("LeftSidebar/Content/PowerConLabel").GetComponent<TextMeshProUGUI>();
-            dashboard.netPowerLabel = canvasGO.transform.Find("LeftSidebar/Content/NetPowerLabel").GetComponent<TextMeshProUGUI>();
+            SetObjRef(so, "missionTimeLabel",     canvasGO.transform.Find("HeaderPanel/MissionTimeLabel")?.GetComponent<TextMeshProUGUI>());
+            SetObjRef(so, "lunarDayLabel",         canvasGO.transform.Find("HeaderPanel/LunarDayLabel")?.GetComponent<TextMeshProUGUI>());
+            SetObjRef(so, "timeScaleLabel",        canvasGO.transform.Find("HeaderPanel/TimeScaleLabel")?.GetComponent<TextMeshProUGUI>());
 
-            dashboard.batteryFillImage = canvasGO.transform.Find("LeftSidebar/Content/BatteryBarBg/BatteryFillImage").GetComponent<Image>();
-            dashboard.batteryLabel = canvasGO.transform.Find("LeftSidebar/Content/BatteryLabel").GetComponent<TextMeshProUGUI>();
+            SetObjRef(so, "powerGenLabel",         canvasGO.transform.Find("LeftSidebar/Content/PowerGenLabel")?.GetComponent<TextMeshProUGUI>());
+            SetObjRef(so, "powerConLabel",         canvasGO.transform.Find("LeftSidebar/Content/PowerConLabel")?.GetComponent<TextMeshProUGUI>());
+            SetObjRef(so, "netPowerLabel",         canvasGO.transform.Find("LeftSidebar/Content/NetPowerLabel")?.GetComponent<TextMeshProUGUI>());
 
-            dashboard.waterStoredLabel = canvasGO.transform.Find("LeftSidebar/Content/WaterStoredLabel").GetComponent<TextMeshProUGUI>();
-            dashboard.waterExtractionLabel = canvasGO.transform.Find("LeftSidebar/Content/WaterExtractionLabel").GetComponent<TextMeshProUGUI>();
+            SetObjRef(so, "batteryFillImage",      canvasGO.transform.Find("LeftSidebar/Content/BatteryBarBg/BatteryFillImage")?.GetComponent<Image>());
+            SetObjRef(so, "batteryLabel",          canvasGO.transform.Find("LeftSidebar/Content/BatteryLabel")?.GetComponent<TextMeshProUGUI>());
 
-            dashboard.o2Label = canvasGO.transform.Find("LeftSidebar/Content/O2Label").GetComponent<TextMeshProUGUI>();
+            SetObjRef(so, "waterStoredLabel",      canvasGO.transform.Find("LeftSidebar/Content/WaterStoredLabel")?.GetComponent<TextMeshProUGUI>());
+            SetObjRef(so, "waterExtractionLabel",  canvasGO.transform.Find("LeftSidebar/Content/WaterExtractionLabel")?.GetComponent<TextMeshProUGUI>());
 
-            dashboard.sparklineContainer = canvasGO.transform.Find("LeftSidebar/Content/SparklineContainer").GetComponent<RectTransform>();
+            SetObjRef(so, "o2Label",               canvasGO.transform.Find("LeftSidebar/Content/O2Label")?.GetComponent<TextMeshProUGUI>());
 
-            dashboard.alertScrollRect = canvasGO.transform.Find("AlertPanel").GetComponent<ScrollRect>();
-            dashboard.alertContent = canvasGO.transform.Find("AlertPanel/AlertContent").GetComponent<RectTransform>();
+            SetObjRef(so, "sparklineContainer",    canvasGO.transform.Find("LeftSidebar/Content/SparklineContainer")?.GetComponent<RectTransform>());
+
+            SetObjRef(so, "alertScrollRect",       canvasGO.transform.Find("AlertPanel")?.GetComponent<ScrollRect>());
+            SetObjRef(so, "alertContent",          canvasGO.transform.Find("AlertPanel/AlertContent")?.GetComponent<RectTransform>());
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(dashboard);
+        }
+
+        private static void SetObjRef(SerializedObject so, string fieldName, Object value)
+        {
+            var prop = so.FindProperty(fieldName);
+            if (prop != null)
+                prop.objectReferenceValue = value;
+            else
+                Debug.LogWarning($"[HUDCanvasSetup] Field '{fieldName}' not found on OperationsDashboardUI");
         }
     }
 }
+
+

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4153c74c4d42ed4418ff81c5df7235ac, type: 3}
+  m_Name: Habitat_Def
+  m_EditorClassIdentifier: Assembly-CSharp::MoonBase.Modules.ModuleDefinition
+  moduleTypeId: module_habitat_01
+  moduleName: Habitat Module
+  description: Pressurized living quarters for 4 crew. Includes life support, sleeping
+    quarters, and workspace. Critical power consumer.
+  icon: {fileID: 0}
+  prefab: {fileID: 8697407863266818210, guid: 0981c388ab897da4b92e082df58f8b83, type: 3}
+  ghostPrefab: {fileID: 0}
+  footprintMeters: {x: 10, y: 10}
+  heightMeters: 5
+  snapGapMeters: 0.5
+  powerGenerationKW: 0
+  powerConsumptionKW: 8
+  crewCapacity: 4
+  oxygenProductionKgPerDay: 0
+  waterExtractionLitersPerDay: 0
+  maxSlopeOverrideDegrees: -1
+  prefersPermanentShadow: 0
+  prefersSunlight: 0
+  category: 0

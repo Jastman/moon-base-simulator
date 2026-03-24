@@ -1,7 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using MoonBase.Core;
 using MoonBase.UI;
+using MoonBase.DataLayers;
+using MoonBase.CameraSystem;
 
 namespace MoonBase.Editor
 {
@@ -192,3 +194,4 @@ namespace MoonBase.Editor
         }
     }
 }
+

@@ -98,45 +98,88 @@ namespace MoonBase.Editor
 
         private static int FixGeoreferenceEllipsoid()
         {
-            // Find CesiumGeoreference in scene
-            var georefType = System.Type.GetType("CesiumForUnity.CesiumGeoreference, CesiumForUnity");
+            // ── Step 1: Ensure Moon ellipsoid asset exists ─────────────────────
+            string moonEllipsoidPath = "Assets/CesiumSettings/MoonEllipsoid.asset";
+            var ellipsoidType = System.Type.GetType("CesiumForUnity.CesiumEllipsoid, CesiumForUnity") ??
+                                System.Type.GetType("CesiumForUnity.CesiumEllipsoid, CesiumRuntime");
+            if (ellipsoidType == null)
+            {
+                Debug.LogWarning("[CesiumSetupFixer] CesiumEllipsoid type not found.");
+                return 0;
+            }
+
+            ScriptableObject moonEllipsoid = AssetDatabase.LoadAssetAtPath<ScriptableObject>(moonEllipsoidPath);
+            if (moonEllipsoid == null)
+            {
+                // Create the directory if needed
+                if (!AssetDatabase.IsValidFolder("Assets/CesiumSettings"))
+                    AssetDatabase.CreateFolder("Assets", "CesiumSettings");
+
+                // Instantiate and set Moon radii (IAU2015: 1737400 x 1737400 x 1735800 m)
+                moonEllipsoid = ScriptableObject.CreateInstance(ellipsoidType) as ScriptableObject;
+                // Set _radii via reflection (double3: x=equatorial, y=equatorial, z=polar)
+                var radiiField = ellipsoidType.GetField("_radii",
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (radiiField != null)
+                {
+                    // double3 from Unity.Mathematics
+                    var double3Type = radiiField.FieldType;
+                    var d3 = System.Activator.CreateInstance(double3Type,
+                        new object[] { 1737400.0, 1737400.0, 1735800.0 });
+                    radiiField.SetValue(moonEllipsoid, d3);
+                }
+                AssetDatabase.CreateAsset(moonEllipsoid, moonEllipsoidPath);
+                AssetDatabase.SaveAssets();
+                Debug.Log($"[CesiumSetupFixer] ✓ Created Moon ellipsoid asset at {moonEllipsoidPath}");
+            }
+            else
+            {
+                Debug.Log($"[CesiumSetupFixer] Moon ellipsoid asset already exists: {moonEllipsoidPath}");
+            }
+
+            // ── Step 2: Assign to CesiumGeoreference ──────────────────────────
+            var georefType = System.Type.GetType("CesiumForUnity.CesiumGeoreference, CesiumForUnity") ??
+                             System.Type.GetType("CesiumForUnity.CesiumGeoreference, CesiumRuntime");
             if (georefType == null) { Debug.LogWarning("[CesiumSetupFixer] CesiumGeoreference type not found."); return 0; }
 
             var georef = Object.FindFirstObjectByType(georefType) as Component;
             if (georef == null) { Debug.LogWarning("[CesiumSetupFixer] No CesiumGeoreference in scene."); return 0; }
 
-            // Try to set ellipsoid to Moon via reflection
-            // In Cesium for Unity ≥1.11, CesiumGeoreference has an ellipsoidOverride property
-            var type = georef.GetType();
-            string[] ellipsoidFields = { "ellipsoidOverride", "_ellipsoidOverride", "ellipsoid" };
-            foreach (var fieldName in ellipsoidFields)
+            // Try SerializedObject first (most reliable for ScriptableObject refs)
+            using (var so = new SerializedObject(georef))
             {
-                var field = type.GetField(fieldName,
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field != null)
+                string[] propNames = { "ellipsoidOverride", "_ellipsoidOverride", "ellipsoid", "_ellipsoid" };
+                foreach (var propName in propNames)
                 {
-                    // Try to find the Moon ellipsoid ScriptableObject
-                    string[] ellipsoidGuids = AssetDatabase.FindAssets("Moon t:CesiumEllipsoid");
-                    if (ellipsoidGuids.Length > 0)
+                    var prop = so.FindProperty(propName);
+                    if (prop != null && prop.propertyType == SerializedPropertyType.ObjectReference)
                     {
-                        string ellipsoidPath = AssetDatabase.GUIDToAssetPath(ellipsoidGuids[0]);
-                        var moonEllipsoid = AssetDatabase.LoadAssetAtPath<ScriptableObject>(ellipsoidPath);
-                        if (moonEllipsoid != null)
-                        {
-                            field.SetValue(georef, moonEllipsoid);
-                            EditorUtility.SetDirty(georef);
-                            Debug.Log($"[CesiumSetupFixer] ✓ CesiumGeoreference ellipsoid set to Moon: {ellipsoidPath}");
-                            return 1;
-                        }
+                        prop.objectReferenceValue = moonEllipsoid;
+                        so.ApplyModifiedPropertiesWithoutUndo();
+                        EditorUtility.SetDirty(georef);
+                        Debug.Log($"[CesiumSetupFixer] ✓ CesiumGeoreference.{propName} set to Moon ellipsoid.");
+                        return 1;
                     }
-                    Debug.LogWarning("[CesiumSetupFixer] Moon CesiumEllipsoid asset not found. " +
-                        "Set ellipsoidOverride manually in CesiumGeoreference Inspector.");
-                    return 0;
                 }
             }
 
-            Debug.LogWarning("[CesiumSetupFixer] CesiumGeoreference ellipsoid field not found via reflection. " +
-                "Set it manually in the Inspector: select CesiumGeoreference → Ellipsoid Override → Moon.");
+            // Fallback: reflection
+            string[] ellipsoidFields = { "ellipsoidOverride", "_ellipsoidOverride", "ellipsoid" };
+            foreach (var fieldName in ellipsoidFields)
+            {
+                var field = georefType.GetField(fieldName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (field != null)
+                {
+                    field.SetValue(georef, moonEllipsoid);
+                    EditorUtility.SetDirty(georef);
+                    Debug.Log($"[CesiumSetupFixer] ✓ CesiumGeoreference.{fieldName} set to Moon ellipsoid (reflection).");
+                    return 1;
+                }
+            }
+
+            Debug.LogWarning("[CesiumSetupFixer] Could not assign Moon ellipsoid via code. " +
+                $"In Inspector: select CesiumGeoreference → Ellipsoid Override → assign MoonEllipsoid from Assets/CesiumSettings/");
             return 0;
         }
 
@@ -166,3 +209,4 @@ namespace MoonBase.Editor
         }
     }
 }
+

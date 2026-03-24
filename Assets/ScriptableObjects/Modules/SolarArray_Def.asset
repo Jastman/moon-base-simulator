@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4153c74c4d42ed4418ff81c5df7235ac, type: 3}
+  m_Name: SolarArray_Def
+  m_EditorClassIdentifier: Assembly-CSharp::MoonBase.Modules.ModuleDefinition
+  moduleTypeId: module_solar_array_01
+  moduleName: Solar Array
+  description: High-efficiency photovoltaic panels. Generates up to 10 kW at full
+    sun exposure. Deploy on high ridges for maximum illumination.
+  icon: {fileID: 0}
+  prefab: {fileID: 8411356430888037558, guid: dce055666bd1a8d428b5a340ba4d60e9, type: 3}
+  ghostPrefab: {fileID: 0}
+  footprintMeters: {x: 12, y: 8}
+  heightMeters: 3
+  snapGapMeters: 0.5
+  powerGenerationKW: 10
+  powerConsumptionKW: 0
+  crewCapacity: 0
+  oxygenProductionKgPerDay: 0
+  waterExtractionLitersPerDay: 0
+  maxSlopeOverrideDegrees: -1
+  prefersPermanentShadow: 0
+  prefersSunlight: 1
+  category: 1
